@@ -21,6 +21,9 @@ const SpineViewer = () => {
           antialias: true
         });
 
+        // Initialize the application
+        await app.init();
+
         // Ensure canvasRef is available before app.view is accessed
         if (!canvasRef.current) {
           console.error('Canvas reference is not available.');
@@ -28,7 +31,7 @@ const SpineViewer = () => {
         }
 
         appRef.current = app;
-        canvasRef.current.appendChild(app.view); // Use app.view instead of app.canvas
+        canvasRef.current.appendChild(app.canvas);
 
         // Load Spine assets directly with atlas metadata
         const parsed = await Assets.load([
