@@ -37,7 +37,7 @@ function App() {
         color: '#666'
       }}>
         <p>Built with Pixi.js v8 + @pixi-spine 3.8 + React 18</p>
-      </div>
+      </footer>
     </div>
   )
 }
