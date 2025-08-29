@@ -27,16 +27,13 @@ const SpineViewer = () => {
         // Register Spine parser with Assets system
         Assets.resolver.add(Spine.SpineParser);
 
-        // Load Spine assets with atlas metadata
-        Assets.add({
-          alias: 'chest',
+        // Load Spine assets directly with atlas metadata
+        const spineData = await Assets.load({
           src: '/chest/proj_1_zoggy_chest_PS_V2.json',
           metadata: { 
             spineAtlasFile: '/chest/proj_1_zoggy_chest_PS_V2.atlas.txt' 
           }
         });
-
-        const spineData = await Assets.load('chest');
         
         // Create Spine instance
         const spine = new Spine(spineData);
