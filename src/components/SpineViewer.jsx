@@ -25,7 +25,7 @@ const SpineViewer = () => {
         canvasRef.current.appendChild(app.canvas);
 
         // Register Spine parser with Assets system
-        Assets.addParser(Spine.SpineParser);
+        Assets.resolver.add(Spine.SpineParser);
 
         // Load Spine assets with atlas metadata
         Assets.add({
