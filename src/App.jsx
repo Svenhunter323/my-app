@@ -1,7 +1,6 @@
-import { useState } from 'react'
-import SpineViewer from './components/SpineViewer'
-import './App.css'
-import { init } from './SpineApp';
+import { useState } from 'react';
+import SpineViewer from './components/SpineViewer';
+import './App.css';
 
 function App() {
   return (
@@ -26,7 +25,13 @@ function App() {
         </p>
       </header>
       
-      <main>
+      <main style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '60vh',  // Keeps the viewer vertically centered
+        padding: '0 20px'
+      }}>
         <SpineViewer />
       </main>
       
@@ -40,7 +45,7 @@ function App() {
         <p>Built with Pixi.js v8 + @pixi-spine 3.8 + React 18</p>
       </footer>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
