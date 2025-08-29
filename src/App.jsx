@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import SpineViewer from './components/SpineViewer'
 import './App.css'
+import { init } from './SpineApp';
 
 function App() {
   return (

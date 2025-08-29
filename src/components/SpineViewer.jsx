@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Application, Assets } from 'pixi.js';
-import { Spine } from '@pixi-spine/all-3.8';
+import { Spine } from '@pixi-spine/runtime-3.8';
+import '@pixi-spine/loader-3.8'; // Auto-registers the Spine loader with Pixi
 
 const SpineViewer = () => {
   const canvasRef = useRef(null);
@@ -14,40 +15,43 @@ const SpineViewer = () => {
     const initPixi = async () => {
       try {
         // Create Pixi application
-        const app = new Application();
-        await app.init({ 
+        const app = new Application({
           resizeTo: canvasRef.current,
           backgroundColor: 0x1a1a1a,
           antialias: true
         });
-        
-        appRef.current = app;
-        canvasRef.current.appendChild(app.canvas);
 
-        // Register Spine parser with Assets system
-        Assets.resolver.add(Spine.SpineParser);
+        // Ensure canvasRef is available before app.view is accessed
+        if (!canvasRef.current) {
+          console.error('Canvas reference is not available.');
+          return;
+        }
+
+        appRef.current = app;
+        canvasRef.current.appendChild(app.view); // Use app.view instead of app.canvas
 
         // Load Spine assets directly with atlas metadata
-        const spineData = await Assets.load({
-          src: '/chest/proj_1_zoggy_chest_PS_V2.json',
-          metadata: { 
-            spineAtlasFile: '/chest/proj_1_zoggy_chest_PS_V2.atlas.txt' 
-          }
-        });
-        
+        const parsed = await Assets.load([
+          '/chest/proj_1_zoggy_chest_PS_V2.json',
+          '/chest/proj_1_zoggy_chest_PS_V2.atlas.txt'
+        ]);
+
+        // The spineData is likely directly in the JSON root, so use the parsed object itself
+        const spineData = parsed[0];  // Correcting data loading, parsed[0] should be the skeleton data
+
         // Create Spine instance
         const spine = new Spine(spineData);
         spineRef.current = spine;
-        
+
         // Center the spine in the canvas
         spine.x = app.screen.width / 2;
         spine.y = app.screen.height / 2;
-        
+
         // Scale to fit nicely
         spine.scale.set(0.8);
-        
+
         app.stage.addChild(spine);
-        
+
         // Set up animation event listeners
         spine.state.addListener({
           complete: (entry) => {
@@ -73,7 +77,7 @@ const SpineViewer = () => {
         };
 
         window.addEventListener('resize', handleResize);
-        
+
         return () => {
           window.removeEventListener('resize', handleResize);
         };
@@ -94,42 +98,33 @@ const SpineViewer = () => {
 
   const playAnimation = (animationName) => {
     if (!spineRef.current) return;
-    
+
     const spine = spineRef.current;
     const loop = animationName === 'open_idle';
-    
+
     spine.state.setAnimation(0, animationName, loop);
     setCurrentAnimation(animationName);
     setIsPlaying(true);
-    
+
+    // Play sound effect based on the animation
     if (animationName === 'open') {
-      // Play open sound effect if available
       try {
         const audio = new Audio('/chest/sfx_open.wav');
         audio.volume = 0.5;
-        audio.play().catch(() => {
-          // Ignore audio errors if file doesn't exist
-        });
-      } catch (error) {
-        // Ignore audio errors
-      }
+        audio.play().catch(() => {});
+      } catch (error) {}
     } else if (animationName === 'reveal') {
-      // Play reveal sound effect if available
       try {
         const audio = new Audio('/chest/sfx_reveal.wav');
         audio.volume = 0.5;
-        audio.play().catch(() => {
-          // Ignore audio errors if file doesn't exist
-        });
-      } catch (error) {
-        // Ignore audio errors
-      }
+        audio.play().catch(() => {});
+      } catch (error) {}
     }
   };
 
   const togglePlayPause = () => {
     if (!spineRef.current) return;
-    
+
     const spine = spineRef.current;
     if (isPlaying) {
       spine.state.timeScale = 0;
@@ -148,7 +143,7 @@ const SpineViewer = () => {
     };
 
     window.addEventListener('spine:play', handleSpinePlay);
-    
+
     return () => {
       window.removeEventListener('spine:play', handleSpinePlay);
     };
@@ -156,24 +151,24 @@ const SpineViewer = () => {
 
   return (
     <div className="spine-viewer">
-      <div 
-        ref={canvasRef} 
+      <div
+        ref={canvasRef}
         className="canvas-container"
-        style={{ 
-          width: '100%', 
-          height: '600px', 
+        style={{
+          width: '100%',
+          height: '600px',
           border: '2px solid #333',
           borderRadius: '12px',
           overflow: 'hidden',
           backgroundColor: '#1a1a1a'
         }}
       />
-      
+
       {isLoaded && (
-        <div className="controls" style={{ 
-          marginTop: '20px', 
-          display: 'flex', 
-          gap: '12px', 
+        <div className="controls" style={{
+          marginTop: '20px',
+          display: 'flex',
+          gap: '12px',
           justifyContent: 'center',
           flexWrap: 'wrap'
         }}>
@@ -192,7 +187,7 @@ const SpineViewer = () => {
           >
             Reveal
           </button>
-          
+
           <button
             onClick={() => playAnimation('open')}
             className={`control-btn ${currentAnimation === 'open' ? 'active' : ''}`}
@@ -208,7 +203,7 @@ const SpineViewer = () => {
           >
             Open
           </button>
-          
+
           <button
             onClick={() => playAnimation('open_idle')}
             className={`control-btn ${currentAnimation === 'open_idle' ? 'active' : ''}`}
@@ -224,7 +219,7 @@ const SpineViewer = () => {
           >
             Open Idle
           </button>
-          
+
           <button
             onClick={togglePlayPause}
             style={{
@@ -241,24 +236,24 @@ const SpineViewer = () => {
           </button>
         </div>
       )}
-      
+
       {!isLoaded && (
-        <div style={{ 
-          textAlign: 'center', 
+        <div style={{
+          textAlign: 'center',
           padding: '40px',
           color: '#888'
         }}>
           Loading Spine animation...
         </div>
       )}
-      
-      <div style={{ 
-        marginTop: '20px', 
+
+      <div style={{
+        marginTop: '20px',
         textAlign: 'center',
         color: '#666',
         fontSize: '14px'
       }}>
-        <p>Use window.dispatchEvent(new CustomEvent('spine:play', {`{ detail: { animation: 'open' } }`})) to trigger animations programmatically</p>
+        <p>{`Use window.dispatchEvent(new CustomEvent("spine:play", { detail: { animation: "open" } })) to trigger animations programmatically`}</p>
         <p>Current: <strong style={{ color: '#646cff' }}>{currentAnimation}</strong></p>
       </div>
     </div>
