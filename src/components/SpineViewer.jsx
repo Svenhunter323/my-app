@@ -34,13 +34,7 @@ const SpineViewer = () => {
         canvasRef.current.appendChild(app.canvas);
 
         // Load Spine assets directly with atlas metadata
-        const parsed = await Assets.load([
-          '/chest/proj_1_zoggy_chest_PS_V2.json',
-          '/chest/proj_1_zoggy_chest_PS_V2.atlas.txt'
-        ]);
-
-        // The spineData is likely directly in the JSON root, so use the parsed object itself
-        const spineData = parsed[0];  // Correcting data loading, parsed[0] should be the skeleton data
+        const spineData = await Assets.load('/chest/proj_1_zoggy_chest_PS_V2.json');
 
         // Create Spine instance
         const spine = new Spine(spineData);
